@@ -32,9 +32,10 @@ loginForm.addEventListener('submit', (e) => {
 registerForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const login = document.getElementById('reg-login').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
   const pass = document.getElementById('reg-pass').value;
   const pass2 = document.getElementById('reg-pass2').value;
-  mp.trigger('ui:auth:registerSubmit', login, pass, pass2);
+  mp.trigger('ui:auth:registerSubmit', login, email, pass, pass2);
 });
 
 window.setAuthError = (msg) => {

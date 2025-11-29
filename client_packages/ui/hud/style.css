@@ -5,8 +5,8 @@ body { margin: 0; pointer-events: none; }
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   padding: 20px; color: #fff;
 }
-.top-left { position: absolute; top: 20px; left: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-.top-right { position: absolute; top: 20px; right: 20px; text-align: right; }
+.top-left { position: absolute; left: 20px; bottom: 140px; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+.top-right { position: absolute; left: 20px; bottom: 20px; text-align: left; }
 .name { font-size: 16px; font-weight: 800; }
 .meta { color: #9bb1d9; font-size: 12px; margin-top: 4px; }
 .money { font-size: 20px; font-weight: 800; margin-bottom: 8px; }

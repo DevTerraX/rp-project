@@ -1,6 +1,6 @@
 const db = require('./db');
 
-const START_POS = { x: -1038.73, y: -2737.94, z: 20.17 };
+const START_POS = { x: 441.2, y: -982.0, z: 30.69 }; // полицейский департамент
 const HOSPITAL_POS = { x: 355.1, y: -596.2, z: 28.77 };
 
 async function createCharacter(player, { accountId, firstName, lastName }) {

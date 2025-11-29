@@ -39,6 +39,7 @@ async function ensureSchema() {
     CREATE TABLE IF NOT EXISTS accounts (
       id INT PRIMARY KEY AUTO_INCREMENT,
       username VARCHAR(32) NOT NULL UNIQUE,
+      email VARCHAR(64) NOT NULL UNIQUE,
       password_hash VARCHAR(255) NOT NULL,
       reg_ip VARCHAR(32),
       last_ip VARCHAR(32),
@@ -66,7 +67,24 @@ async function ensureSchema() {
   `;
 
   await queryRaw(sqlAccounts);
+  await ensureEmailColumn();
   await queryRaw(sqlCharacters);
+}
+
+async function ensureEmailColumn() {
+  const [rows] = await queryRaw(
+    `
+      SELECT 1
+        FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = 'accounts'
+         AND COLUMN_NAME = 'email'
+    `
+  );
+  if (rows.length) return;
+  await queryRaw("ALTER TABLE accounts ADD COLUMN email VARCHAR(64) DEFAULT NULL AFTER username");
+  await queryRaw("ALTER TABLE accounts ADD UNIQUE KEY accounts_email_unique (email)");
+  console.log('[db] added email column to accounts');
 }
 
 async function queryRaw(sql, params = []) {

@@ -4,6 +4,7 @@ const account = require('./core/account');
 const player = require('./core/player');
 const chat = require('./core/chat');
 const admin = require('./core/admin');
+require('./mygamemode'); // registers custom commands/events
 
 // Entry point for server packages
 function bootstrap() {

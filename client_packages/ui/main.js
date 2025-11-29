@@ -187,8 +187,8 @@ mp.events.add('ui:auth:loginSubmit', (login, password) => {
   mp.events.callRemote('auth:login', login, password);
 });
 
-mp.events.add('ui:auth:registerSubmit', (login, password, confirm) => {
-  mp.events.callRemote('auth:register', login, password, confirm);
+mp.events.add('ui:auth:registerSubmit', (login, email, password, confirm) => {
+  mp.events.callRemote('auth:register', login, email, password, confirm);
 });
 
 mp.events.add('ui:char:createSubmit', (firstName, lastName) => {

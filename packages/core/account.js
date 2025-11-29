@@ -51,8 +51,18 @@ function validateNames(player, firstName, lastName) {
   return true;
 }
 
-async function registerAccount(player, username, password, confirmPassword) {
+function validateEmail(player, email) {
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !EMAIL_REGEX.test(email)) {
+    sendError(player, 'Укажите корректный e-mail.');
+    return false;
+  }
+  return true;
+}
+
+async function registerAccount(player, username, email, password, confirmPassword) {
   if (!validateCredentials(player, username, password, confirmPassword)) return null;
+  if (!validateEmail(player, email)) return null;
 
   const existing = await findAccountByUsername(username);
   if (existing) {
@@ -64,8 +74,8 @@ async function registerAccount(player, username, password, confirmPassword) {
   const ip = player.ip || player.getIp();
 
   const [result] = await db.query(
-    'INSERT INTO accounts (username, password_hash, reg_ip, last_ip, last_login) VALUES (?, ?, ?, ?, NOW())',
-    [username, passwordHash, ip, ip]
+    'INSERT INTO accounts (username, email, password_hash, reg_ip, last_ip, last_login) VALUES (?, ?, ?, ?, ?, NOW())',
+    [username, email, passwordHash, ip, ip]
   );
 
   console.log(`[auth] Создан аккаунт ${username} (${result.insertId}) IP=${ip}`);
@@ -134,8 +144,8 @@ function registerAuthHandlers() {
     console.log(`[auth] Join ${player.name} (${player.ip})`);
   });
 
-  mp.events.add('auth:register', (player, username, password, confirmPassword) => {
-    registerAccount(player, username, password, confirmPassword).catch((err) => {
+  mp.events.add('auth:register', (player, username, email, password, confirmPassword) => {
+    registerAccount(player, username, email, password, confirmPassword).catch((err) => {
       console.error('[auth] register error', err);
       sendError(player, 'Ошибка регистрации.');
     });
