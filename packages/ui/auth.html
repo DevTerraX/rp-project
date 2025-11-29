@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход</title>
+  <link rel="stylesheet" href="../client_packages/ui/auth.css">
+</head>
+<body>
+  <div class="panel">
+    <h1>RAGE:MP RP</h1>
+    <h2>Вход</h2>
+    <form id="loginForm">
+      <label>Логин</label>
+      <input id="login-username" type="text" maxlength="32" required>
+      <label>Пароль</label>
+      <input id="login-password" type="password" required>
+      <button type="submit">Войти</button>
+    </form>
+    <button class="link-btn" onclick="mp.trigger('ui:auth:navigate', 'register')">Создать аккаунт</button>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      mp.trigger('auth:login', username, password);
+    });
+
+    window.prefillUsername = (value) => {
+      document.getElementById('login-username').value = value || '';
+    };
+  </script>
+</body>
+</html>

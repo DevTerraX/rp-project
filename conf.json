@@ -7,5 +7,11 @@
   "port": 22005,
   "stream-distance": 500.0,
   "allow-cef-debugging": true,
-  "enable-nodejs": true
+  "enable-nodejs": true,
+  "db": {
+    "host": "127.0.0.1",
+    "user": "root",
+    "password": "",
+    "database": "rage_rp"
+  }
 }

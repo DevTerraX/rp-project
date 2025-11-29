@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="../client_packages/ui/auth.css">
+</head>
+<body>
+  <div class="panel">
+    <h1>RAGE:MP RP</h1>
+    <h2 id="register-title">Регистрация аккаунта и персонажа</h2>
+    <form id="registerForm">
+      <div class="account-fields">
+        <label>Логин</label>
+        <input id="reg-username" type="text" maxlength="32" required>
+        <label>Пароль</label>
+        <input id="reg-password" type="password" required>
+        <label>Повторите пароль</label>
+        <input id="reg-password-confirm" type="password" required>
+      </div>
+      <label>Имя</label>
+      <input id="reg-firstname" type="text" maxlength="16" required>
+      <label>Фамилия</label>
+      <input id="reg-lastname" type="text" maxlength="16" required>
+      <button id="submit-btn" type="submit">Создать</button>
+    </form>
+    <button class="link-btn" onclick="mp.trigger('ui:auth:navigate', 'auth')">Назад ко входу</button>
+  </div>
+
+  <script>
+    let characterOnly = false;
+
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-password-confirm').value;
+      const firstName = document.getElementById('reg-firstname').value.trim();
+      const lastName = document.getElementById('reg-lastname').value.trim();
+      if (characterOnly) {
+        mp.trigger('auth:createCharacter', firstName, lastName);
+      } else {
+        mp.trigger('auth:register', username, password, confirm, firstName, lastName);
+      }
+    });
+
+    window.prefillUsername = (value) => {
+      document.getElementById('reg-username').value = value || '';
+    };
+
+    window.setCharacterOnly = (flag) => {
+      characterOnly = flag;
+      const accountFields = document.querySelector('.account-fields');
+      const title = document.getElementById('register-title');
+      const button = document.getElementById('submit-btn');
+      if (flag) {
+        accountFields.style.display = 'none';
+        title.innerText = 'Создание персонажа';
+        button.innerText = 'Создать персонажа';
+      } else {
+        accountFields.style.display = 'grid';
+        title.innerText = 'Регистрация аккаунта и персонажа';
+        button.innerText = 'Создать';
+      }
+    };
+  </script>
+</body>
+</html>
