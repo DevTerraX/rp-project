@@ -1,0 +1,11 @@
+{
+  "announce": false,
+  "bind": "0.0.0.0",
+  "gamemode": "packages/index.js",
+  "name": "Evgeniy Test Server",
+  "maxplayers": 50,
+  "port": 22005,
+  "stream-distance": 500.0,
+  "allow-cef-debugging": true,
+  "enable-nodejs": true
+}
