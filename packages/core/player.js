@@ -21,8 +21,8 @@ async function createCharacter(player, { accountId, firstName, lastName }) {
 
 function applyCharacterToPlayer(player, character) {
   player.name = character.name;
-  player.position = new mp.Vector3(character.pos_x, character.pos_y, character.pos_z);
   player.dimension = character.dimension || 0;
+  player.spawn(new mp.Vector3(character.pos_x, character.pos_y, character.pos_z));
   player.health = character.health || 100;
   player.armour = character.armor || 0;
 }
@@ -35,6 +35,7 @@ function updateHud(player, character) {
     player.armour,
     character.name,
     player.data.adminLevel || 0,
+    player.data.characterId || 0,
   ]);
 }
 
@@ -43,9 +44,11 @@ function finishLogin(player, account, character) {
   player.data.adminLevel = account.admin_level || 0;
   player.data.characterId = character.id;
   player.data.character = character;
+  player.call('ui:lockControls', [false]);
 
   applyCharacterToPlayer(player, character);
-  player.call('ui:auth:close');
+  player.call('auth:success');
+  player.call('ui:hud:show');
   updateHud(player, character);
   player.outputChatBox(`!{#5cb85c}[Auth] Добро пожаловать, ${character.name}.`);
 }
@@ -53,6 +56,12 @@ function finishLogin(player, account, character) {
 async function saveCharacter(player) {
   if (!player.data.characterId) return;
   const pos = player.position;
+  player.data.character.pos_x = pos.x;
+  player.data.character.pos_y = pos.y;
+  player.data.character.pos_z = pos.z;
+  player.data.character.dimension = player.dimension;
+  player.data.character.health = player.health;
+  player.data.character.armor = player.armour;
   await db.query(
     `
       UPDATE characters
@@ -80,20 +89,28 @@ function registerPlayerHandlers() {
     });
   }, 30000);
 
-  mp.events.add('playerQuit', (player) => {
+  mp.events.add('playerQuit', (player, exitType, reason) => {
+    console.log(`[player] Quit ${player.name} type=${exitType || ''} reason=${reason || ''}`);
     saveCharacter(player).catch((err) => console.error('[player] quit save error', err));
   });
 
   mp.events.add('playerDeath', (player) => {
+    player.call('ui:hud:hide');
     setTimeout(() => {
       if (!player || !player.data.characterId) return;
       player.spawn(new mp.Vector3(HOSPITAL_POS.x, HOSPITAL_POS.y, HOSPITAL_POS.z));
+      player.data.character.pos_x = HOSPITAL_POS.x;
+      player.data.character.pos_y = HOSPITAL_POS.y;
+      player.data.character.pos_z = HOSPITAL_POS.z;
       if (player.data.character.cash > 250) {
         player.data.character.cash -= 250;
       } else {
         player.data.character.cash = 0;
       }
+      player.health = 100;
+      player.armour = 0;
       updateHud(player, player.data.character);
+      player.call('ui:hud:show');
     }, 15000);
   });
 }

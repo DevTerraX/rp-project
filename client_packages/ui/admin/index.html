@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="admin" class="panel hidden">
+    <div class="header">
+      <div class="title">Админ-панель</div>
+      <button id="close-btn">×</button>
+    </div>
+    <div class="controls">
+      <input id="search" type="text" placeholder="Поиск по ID/имени">
+      <button id="refresh-btn">Обновить</button>
+    </div>
+    <div id="list" class="list"></div>
+    <div class="actions">
+      <button data-action="tp_to">TP к игроку</button>
+      <button data-action="tp_here">TP игрока ко мне</button>
+      <button data-action="freeze">Заморозить</button>
+      <button data-action="unfreeze">Разморозить</button>
+      <button data-action="givemoney">Выдать деньги</button>
+      <button data-action="sethp">Set HP</button>
+      <button data-action="setarmor">Set Armor</button>
+      <button data-action="kick">Kick</button>
+      <button data-action="ban">Ban</button>
+    </div>
+    <div class="payload">
+      <input id="payload" type="text" placeholder="Значение / причина">
+      <button id="apply-btn">Применить</button>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>

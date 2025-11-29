@@ -1,0 +1,32 @@
+.chat {
+  position: absolute;
+  bottom: 60px;
+  left: 30px;
+  width: 400px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: none;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+.msg {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(5px);
+  animation: fade 5s forwards;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  font-size: 14px;
+}
+.msg.ic { color: #f5f7ff; }
+.msg.ooc { color: #65c7ff; }
+.msg.me { color: #c08aff; }
+.msg.do { color: #e0d449; }
+.msg.error { color: #ff6b6b; }
+@keyframes fade {
+  0% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(5px); }
+}

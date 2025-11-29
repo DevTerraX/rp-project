@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <div class="logo">RAGE:RP</div>
+    <div class="tabs">
+      <button id="tab-login" class="active">Вход</button>
+      <button id="tab-register">Регистрация</button>
+    </div>
+    <div id="error" class="error" style="display:none;"></div>
+    <form id="login-form">
+      <input id="login-login" type="text" maxlength="32" placeholder="Логин" autocomplete="off" required>
+      <input id="login-pass" type="password" placeholder="Пароль" required>
+      <button type="submit">Войти</button>
+    </form>
+    <form id="register-form" style="display:none;">
+      <input id="reg-login" type="text" maxlength="32" placeholder="Логин" autocomplete="off" required>
+      <input id="reg-pass" type="password" placeholder="Пароль" required>
+      <input id="reg-pass2" type="password" placeholder="Повтор пароля" required>
+      <button type="submit">Создать аккаунт</button>
+    </form>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>

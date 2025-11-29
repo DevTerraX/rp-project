@@ -1,0 +1,23 @@
+.panel {
+  position: absolute; top: 50px; right: 50px; width: 420px;
+  background: rgba(10,14,26,0.92); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; color: #fff; padding: 16px; font-family: 'Inter','Segoe UI',sans-serif;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45); pointer-events: all;
+}
+.hidden { display: none; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.title { font-weight: 800; font-size: 16px; }
+#close-btn { background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+.controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 8px; }
+.list { max-height: 240px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px; }
+.row { padding: 6px 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.row.active { background: rgba(63,140,255,0.2); }
+.row:hover { background: rgba(255,255,255,0.06); }
+.actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+.actions button, #refresh-btn, #apply-btn {
+  padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; font-weight: 700;
+}
+.payload { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+input { padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; }
+.status { margin-top: 8px; color: #9bb1d9; font-size: 12px; }

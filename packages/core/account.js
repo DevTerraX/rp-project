@@ -2,9 +2,12 @@ const bcrypt = require('bcryptjs');
 const db = require('./db');
 const playerService = require('./player');
 
+const AUTH_DIMENSION = 9999;
+const NAME_REGEX = /^[A-Za-z]{2,16}$/;
+
 function sendError(player, message) {
+  player.call('auth:error', [message]);
   player.outputChatBox(`!{#ff5c5c}[Auth] ${message}`);
-  player.call('ui:auth:error', [message]);
 }
 
 async function findAccountByUsername(username) {
@@ -12,17 +15,49 @@ async function findAccountByUsername(username) {
   return rows[0];
 }
 
-async function registerAccount(player, username, password, confirmPassword, firstName, lastName) {
-  if (!username || !password || !confirmPassword || !firstName || !lastName) {
-    return sendError(player, 'Заполните все поля.');
+function lockForAuth(player) {
+  player.dimension = AUTH_DIMENSION;
+  player.alpha = 0;
+  player.call('ui:hud:hide');
+  player.call('ui:lockControls', [true]);
+}
+
+function unlockAfterAuth(player) {
+  player.alpha = 255;
+  player.call('ui:lockControls', [false]);
+}
+
+function validateCredentials(player, username, password, confirmPassword) {
+  if (!username || !password || !confirmPassword) {
+    sendError(player, 'Заполните все поля.');
+    return false;
+  }
+  if (password.length < 6) {
+    sendError(player, 'Слишком короткий пароль.');
+    return false;
   }
   if (password !== confirmPassword) {
-    return sendError(player, 'Пароли не совпадают.');
+    sendError(player, 'Пароли не совпадают.');
+    return false;
   }
+  return true;
+}
+
+function validateNames(player, firstName, lastName) {
+  if (!NAME_REGEX.test(firstName) || !NAME_REGEX.test(lastName)) {
+    sendError(player, 'Имя и фамилия недопустимы.');
+    return false;
+  }
+  return true;
+}
+
+async function registerAccount(player, username, password, confirmPassword) {
+  if (!validateCredentials(player, username, password, confirmPassword)) return null;
 
   const existing = await findAccountByUsername(username);
   if (existing) {
-    return sendError(player, 'Такой логин уже существует.');
+    sendError(player, 'Логин занят');
+    return null;
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -33,17 +68,11 @@ async function registerAccount(player, username, password, confirmPassword, firs
     [username, passwordHash, ip, ip]
   );
 
-  const accountId = result.insertId;
-  player.outputChatBox('!{#5cb85c}[Auth] Аккаунт создан, персонаж будет создан.');
-
-  const character = await playerService.createCharacter(player, {
-    accountId,
-    firstName,
-    lastName,
-  });
-
-  await db.query('UPDATE accounts SET last_login = NOW() WHERE id = ?', [accountId]);
-  playerService.finishLogin(player, { accountId, adminLevel: 0 }, character);
+  console.log(`[auth] Создан аккаунт ${username} (${result.insertId}) IP=${ip}`);
+  player.data.pendingAccountId = result.insertId;
+  player.call('auth:registered', [username]);
+  player.call('char:create:open');
+  return result.insertId;
 }
 
 async function loginAccount(player, username, password) {
@@ -52,46 +81,61 @@ async function loginAccount(player, username, password) {
   }
 
   const account = await findAccountByUsername(username);
-  if (!account) return sendError(player, 'Аккаунт не найден.');
+  if (!account) {
+    console.warn(`[auth] Аккаунт не найден для ${username} (${player.ip})`);
+    return sendError(player, 'Аккаунт не найден');
+  }
 
   const match = await bcrypt.compare(password, account.password_hash);
-  if (!match) return sendError(player, 'Неверный пароль.');
+  if (!match) {
+    console.warn(`[auth] Неверный пароль ${username} (${player.ip})`);
+    return sendError(player, 'Неверный пароль');
+  }
 
   const [rows] = await db.query('SELECT * FROM characters WHERE account_id = ? LIMIT 1', [account.id]);
-  let character = rows[0];
+  const character = rows[0];
+
+  await db.query('UPDATE accounts SET last_ip = ?, last_login = NOW() WHERE id = ?', [
+    player.ip || player.getIp(),
+    account.id,
+  ]);
 
   if (!character) {
-    player.call('ui:auth:open', ['register', username, true]);
-    player.outputChatBox('!{#e0d449}[Auth] Создайте персонажа.');
     player.data.pendingAccountId = account.id;
-  } else {
-    await db.query('UPDATE accounts SET last_ip = ?, last_login = NOW() WHERE id = ?', [
-      player.ip || player.getIp(),
-      account.id,
-    ]);
-    playerService.finishLogin(player, account, character);
+    player.call('char:create:open');
+    player.call('auth:needsCharacter', [account.username]);
+    player.outputChatBox('!{#e0d449}[Auth] Создайте персонажа.');
+    return;
   }
+
+  console.log(`[auth] Успешный вход ${username} (${account.id})`);
+  unlockAfterAuth(player);
+  playerService.finishLogin(player, account, character);
 }
 
 async function createCharacterForAccount(player, firstName, lastName) {
+  if (!validateNames(player, firstName, lastName)) return;
   const accountId = player.data.pendingAccountId;
   if (!accountId) return sendError(player, 'Сначала авторизуйтесь.');
 
   const character = await playerService.createCharacter(player, { accountId, firstName, lastName });
   const [accountRows] = await db.query('SELECT * FROM accounts WHERE id = ?', [accountId]);
   const account = accountRows[0];
+  console.log(`[auth] Создан персонаж ${character.name} для аккаунта ${account.username}`);
+  unlockAfterAuth(player);
   playerService.finishLogin(player, account, character);
 }
 
 function registerAuthHandlers() {
   mp.events.add('playerJoin', (player) => {
     player.data = player.data || {};
-    player.call('ui:auth:open', ['auth']);
-    player.dimension = 0;
+    lockForAuth(player);
+    player.call('auth:show');
+    console.log(`[auth] Join ${player.name} (${player.ip})`);
   });
 
-  mp.events.add('auth:register', (player, username, password, confirmPassword, firstName, lastName) => {
-    registerAccount(player, username, password, confirmPassword, firstName, lastName).catch((err) => {
+  mp.events.add('auth:register', (player, username, password, confirmPassword) => {
+    registerAccount(player, username, password, confirmPassword).catch((err) => {
       console.error('[auth] register error', err);
       sendError(player, 'Ошибка регистрации.');
     });
@@ -114,4 +158,5 @@ function registerAuthHandlers() {
 
 module.exports = {
   registerAuthHandlers,
+  lockForAuth,
 };
